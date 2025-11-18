@@ -1,5 +1,5 @@
-// typing-effect-final.js - Bulletproof version
-function safeTypeWriter(element, text, speed = 150) {
+// typing-effect.js - Final working version
+function typeWriter(element, text, speed = 150) {
   let i = 0;
   element.textContent = '';
   
@@ -9,7 +9,6 @@ function safeTypeWriter(element, text, speed = 150) {
       i++;
       setTimeout(type, speed);
     } else {
-      // Add blinking cursor
       element.style.borderRight = '2px solid #5865f2';
       setInterval(() => {
         element.style.borderRight = element.style.borderRight ? '' : '2px solid #5865f2';
@@ -20,45 +19,30 @@ function safeTypeWriter(element, text, speed = 150) {
   type();
 }
 
-function findUsername(maxTries = 10) {
-  const selectors = [
-    'h1', 
-    'h1.tptitle',
-    '.profile-text-content h1',
-    'h1.text-4xl', 
-    'h1.font-bold',
-    'h1[class*="text-4xl"]'
-  ];
-  
-  for (const selector of selectors) {
-    const element = document.querySelector(selector);
-    if (element && element.textContent && element.textContent.trim()) {
-      return element;
+function waitForProfileElements(callback, timeout = 10000) {
+  const checkElements = () => {
+    const username = document.querySelector('h1') || 
+                     document.querySelector('h1[class*="text-4xl"]') ||
+                     document.querySelector('[class*="profile-text-content"] h1');
+    
+    if (username && username.textContent && username.textContent.trim()) {
+      callback(username);
+    } else {
+      setTimeout(checkElements, 100);
     }
-  }
-  return null;
+  };
+  
+  checkElements();
+  setTimeout(() => callback(null), timeout);
 }
 
-// Keep trying to find username element
-function waitForUsername(tryCount = 0) {
-  if (tryCount > 15) { // Max 15 seconds
-    console.warn('Gave up waiting for username element');
-    return;
-  }
-  
-  const username = findUsername();
-  
+// Wait for profile to load, then apply typing effect
+waitForProfileElements((username) => {
   if (username) {
-    console.log('Found username element:', username, 'with text:', username.textContent);
     const originalText = username.textContent.trim();
-    if (originalText) {
-      safeTypeWriter(username, originalText);
-    }
+    console.log('Applying typing effect to:', originalText);
+    typeWriter(username, originalText);
   } else {
-    // Try again in 1 second
-    setTimeout(() => waitForUsername(tryCount + 1), 1000);
+    console.warn('Typing effect: Username element not found after waiting');
   }
-}
-
-// Start waiting immediately
-waitForUsername();
+});
