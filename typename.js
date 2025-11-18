@@ -1,18 +1,28 @@
-// Select all elements with class 'tptitle'
-const titles = document.querySelectorAll('.tptitle');
-
-titles.forEach(title => {
-    const fullText = title.getAttribute('data-text') || '';
-    let index = 0;
-
-    function type() {
-        title.textContent = fullText.slice(0, index);
-        index++;
-
-        if (index <= fullText.length) {
-            setTimeout(type, 100); // typing speed in ms
-        }
+// typing-effect.js
+function typeWriter(element, text, speed = 100) {
+  let i = 0;
+  element.textContent = '';
+  
+  function type() {
+    if (i < text.length) {
+      element.textContent += text.charAt(i);
+      i++;
+      setTimeout(type, speed);
+    } else {
+      // Add cursor blink
+      element.style.borderRight = '2px solid #5865f2';
+      setInterval(() => {
+        element.style.borderRight = element.style.borderRight ? '' : '2px solid #5865f2';
+      }, 500);
     }
+  }
+  
+  type();
+}
 
-    type();
-});
+// Apply to username
+const username = document.querySelector('h1') || document.querySelector('.tptitle');
+if (username) {
+  const originalText = username.textContent;
+  typeWriter(username, originalText, 150);
+}
